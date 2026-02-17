@@ -1,0 +1,24 @@
+# Gradle
+build/
+# Optional: uncomment to ignore local Gradle install (then rely on wrapper jar)
+# .gradle/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Local
+.env
+.env.local
+application-local.yml

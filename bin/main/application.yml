@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: enterprise-scheduling-engine
+  datasource:
+    url: jdbc:postgresql://localhost:5432/schedulingdb
+    username: scheduling
+    password: scheduling
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: public
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus,info
+  endpoint:
+    health:
+      show-details: when-authorized
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  level:
+    schedulingengine: INFO
+    org.springframework.modulith: INFO
