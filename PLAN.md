@@ -69,7 +69,8 @@ Single deployable modular monolith with four modules: **scheduling**, **constrai
 - Create schedule via POST; verify in logs or DB that constraints ran and event published.
 
 **Verification:**
-- Unit tests for validator; integration test or manual check that `ConstraintsValidated` is emitted after valid schedule creation.
+- Unit tests for validator (`ScheduleConstraintsValidatorTest`); listener test (`ScheduleRequestedListenerTest`) that valid schedule → `ConstraintsValidated`, invalid → `ConstraintsFailed`.
+- Manual: POST valid schedule, see `ConstraintsValidated` in logs; POST invalid (e.g. end before start), see `ConstraintsFailed`.
 
 ---
 

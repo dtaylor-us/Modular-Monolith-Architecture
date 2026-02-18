@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import schedulingengine.scheduling.application.CreateScheduleCommand;
@@ -33,16 +34,18 @@ class ScheduleController {
 
     @PostMapping
     ResponseEntity<ScheduleResponse> create(@Valid @RequestBody CreateScheduleRequest request) {
+        var startInstant = request.start().toInstant(ZoneOffset.UTC);
+        var endInstant = request.end().toInstant(ZoneOffset.UTC);
         ScheduleResult result = commandService.createSchedule(new CreateScheduleCommand(
-            request.start(),
-            request.end(),
+            startInstant,
+            endInstant,
             request.title()
         ));
         return queryService.findById(result.scheduleId())
             .map(ScheduleController::toResponse)
             .map(body -> ResponseEntity.status(HttpStatus.CREATED).body(body))
             .orElse(ResponseEntity.status(HttpStatus.CREATED).body(new ScheduleResponse(
-                result.scheduleId(), request.start(), request.end(), request.title(), null
+                result.scheduleId(), startInstant, endInstant, request.title(), null
             )));
     }
 
