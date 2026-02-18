@@ -1,16 +1,20 @@
 package schedulingengine.scheduling.adapters.web;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
 /**
- * Request body for creating a schedule. Start and end are accepted as ISO-8601 local date-time
- * (e.g. "2025-02-20T09:00:00") and are interpreted as UTC when no offset is provided.
+ * Request body for creating a schedule request. Times are ISO-8601 local date-time (e.g. "2026-02-18T09:00:00")
+ * interpreted as UTC when no offset is provided.
  */
 public record CreateScheduleRequest(
-    @NotNull LocalDateTime start,
-    @NotNull LocalDateTime end,
-    @NotBlank String title
+    String title,
+    @NotNull LocalDateTime earliestStart,
+    @NotNull LocalDateTime latestEnd,
+    @NotNull @Min(1) @Max(24 * 60) int durationMinutes,
+    LocalDateTime preferredStart,
+    String priority
 ) {}

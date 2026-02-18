@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import schedulingengine.scheduling.ScheduleRequested;
-import schedulingengine.scheduling.domain.Schedule;
+import schedulingengine.scheduling.domain.ScheduleRequest;
+import schedulingengine.scheduling.domain.ScheduleView;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -44,24 +45,32 @@ class ScheduleApplicationServiceTest {
     List<ScheduleRequested> publishedEvents;
 
     @Test
-    @DisplayName("create schedule persists and publishes ScheduleRequested")
-    void createSchedulePersistsAndPublishesEvent() {
-        var start = Instant.parse("2025-02-20T09:00:00Z");
-        var end = Instant.parse("2025-02-20T17:00:00Z");
+    @DisplayName("create schedule request persists and publishes ScheduleRequested")
+    void createScheduleRequestPersistsAndPublishesEvent() {
         var title = "Team sync";
+        var earliestStart = Instant.parse("2026-02-18T09:00:00Z");
+        var latestEnd = Instant.parse("2026-02-18T17:00:00Z");
+        var durationMinutes = 90;
+        var preferredStart = Instant.parse("2026-02-18T10:00:00Z");
+        var priority = "HIGH";
         publishedEvents.clear();
 
-        var result = commandService.createSchedule(new CreateScheduleCommand(start, end, title));
+        var result = commandService.createSchedule(new CreateScheduleCommand(
+            title, earliestStart, latestEnd, durationMinutes, preferredStart, priority));
 
-        assertThat(result.scheduleId()).isNotNull();
-        Optional<Schedule> loaded = queryService.findById(result.scheduleId());
+        assertThat(result.requestId()).isNotNull();
+        Optional<ScheduleRequest> loaded = queryService.findById(result.requestId());
         assertThat(loaded).isPresent();
-        assertThat(loaded.get().startTime()).isEqualTo(start);
-        assertThat(loaded.get().endTime()).isEqualTo(end);
         assertThat(loaded.get().title()).isEqualTo(title);
+        assertThat(loaded.get().earliestStart()).isEqualTo(earliestStart);
+        assertThat(loaded.get().latestEnd()).isEqualTo(latestEnd);
+        assertThat(loaded.get().durationMinutes()).isEqualTo(durationMinutes);
+        assertThat(loaded.get().preferredStart()).isEqualTo(preferredStart);
+        assertThat(loaded.get().priority()).isEqualTo(priority);
         assertThat(publishedEvents).hasSize(1);
-        assertThat(publishedEvents.get(0).scheduleId()).isEqualTo(result.scheduleId());
+        assertThat(publishedEvents.get(0).requestId()).isEqualTo(result.requestId());
         assertThat(publishedEvents.get(0).title()).isEqualTo(title);
+        assertThat(publishedEvents.get(0).durationMinutes()).isEqualTo(durationMinutes);
     }
 
     @Configuration
@@ -74,19 +83,36 @@ class ScheduleApplicationServiceTest {
         }
 
         @Bean
-        ScheduleRepository scheduleRepository() {
-            return new ScheduleRepository() {
-                private final java.util.Map<UUID, Schedule> store = new java.util.HashMap<>();
+        ScheduleRequestRepository scheduleRequestRepository() {
+            return new ScheduleRequestRepository() {
+                private final java.util.Map<UUID, ScheduleRequest> store = new java.util.HashMap<>();
 
                 @Override
-                public Schedule save(Schedule schedule) {
-                    store.put(schedule.id(), schedule);
-                    return schedule;
+                public ScheduleRequest save(ScheduleRequest request) {
+                    store.put(request.id(), request);
+                    return request;
                 }
 
                 @Override
-                public Schedule findById(UUID id) {
+                public ScheduleRequest findById(UUID id) {
                     return store.get(id);
+                }
+            };
+        }
+
+        @Bean
+        ScheduleViewRepository scheduleViewRepository() {
+            return new ScheduleViewRepository() {
+                private final java.util.Map<UUID, ScheduleView> store = new java.util.HashMap<>();
+
+                @Override
+                public void save(ScheduleView view) {
+                    store.put(view.requestId(), view);
+                }
+
+                @Override
+                public ScheduleView findByRequestId(UUID requestId) {
+                    return store.get(requestId);
                 }
             };
         }

@@ -10,33 +10,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Validates schedule constraints: start &lt; end, duration within limit, non-blank title.
+ * Validates schedule request constraints: earliestStart &lt; latestEnd, durationMinutes &gt; 0,
+ * and earliestStart + duration fits within latestEnd.
  */
 @Component
 class ScheduleConstraintsValidator {
 
-    private static final Duration MAX_DURATION = Duration.ofHours(24);
-
-    ValidationResult validate(Instant startTime, Instant endTime, String title) {
+    ValidationResult validate(Instant earliestStart, Instant latestEnd, int durationMinutes, Instant preferredStart) {
         List<String> reasons = new ArrayList<>();
 
-        if (startTime == null) {
-            reasons.add("startTime is required");
+        if (earliestStart == null) {
+            reasons.add("earliestStart is required");
         }
-        if (endTime == null) {
-            reasons.add("endTime is required");
+        if (latestEnd == null) {
+            reasons.add("latestEnd is required");
         }
-        if (startTime != null && endTime != null && !endTime.isAfter(startTime)) {
-            reasons.add("endTime must be after startTime");
+        if (earliestStart != null && latestEnd != null && !latestEnd.isAfter(earliestStart)) {
+            reasons.add("latestEnd must be after earliestStart");
         }
-        if (startTime != null && endTime != null && endTime.isAfter(startTime)) {
-            Duration duration = Duration.between(startTime, endTime);
-            if (duration.compareTo(MAX_DURATION) > 0) {
-                reasons.add("duration must not exceed " + MAX_DURATION.toHours() + " hours");
+        if (durationMinutes <= 0) {
+            reasons.add("durationMinutes must be greater than 0");
+        }
+        if (earliestStart != null && latestEnd != null && durationMinutes > 0) {
+            Instant slotEnd = earliestStart.plus(Duration.ofMinutes(durationMinutes));
+            if (slotEnd.isAfter(latestEnd)) {
+                reasons.add("earliestStart + durationMinutes must not exceed latestEnd");
             }
-        }
-        if (title == null || title.isBlank()) {
-            reasons.add("title is required and must not be blank");
         }
 
         return reasons.isEmpty()

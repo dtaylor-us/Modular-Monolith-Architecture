@@ -45,16 +45,19 @@ class ScheduleRequestedListenerTest {
     List<ConstraintsFailed> failedEvents;
 
     @Test
-    @DisplayName("publishes ConstraintsValidated for valid schedule")
-    void publishesConstraintsValidatedForValidSchedule() {
+    @DisplayName("publishes ConstraintsValidated for valid request")
+    void publishesConstraintsValidatedForValidRequest() {
         validatedEvents.clear();
         failedEvents.clear();
 
         eventPublisher.publishEvent(new ScheduleRequested(
             UUID.randomUUID(),
-            Instant.parse("2025-02-20T09:00:00Z"),
-            Instant.parse("2025-02-20T17:00:00Z"),
-            "Valid meeting",
+            null,
+            Instant.parse("2026-02-18T09:00:00Z"),
+            Instant.parse("2026-02-18T17:00:00Z"),
+            90,
+            null,
+            null,
             Instant.now()
         ));
 
@@ -63,21 +66,24 @@ class ScheduleRequestedListenerTest {
     }
 
     @Test
-    @DisplayName("publishes ConstraintsFailed for invalid schedule")
-    void publishesConstraintsFailedForInvalidSchedule() {
+    @DisplayName("publishes ConstraintsFailed for invalid request")
+    void publishesConstraintsFailedForInvalidRequest() {
         validatedEvents.clear();
         failedEvents.clear();
 
         eventPublisher.publishEvent(new ScheduleRequested(
             UUID.randomUUID(),
-            Instant.parse("2025-02-20T17:00:00Z"),
-            Instant.parse("2025-02-20T09:00:00Z"),
-            "Invalid - end before start",
+            null,
+            Instant.parse("2026-02-18T17:00:00Z"),
+            Instant.parse("2026-02-18T09:00:00Z"),
+            60,
+            null,
+            null,
             Instant.now()
         ));
 
         assertThat(failedEvents).hasSize(1);
-        assertThat(failedEvents.get(0).reasons()).anyMatch(r -> r.contains("endTime must be after startTime"));
+        assertThat(failedEvents.get(0).reasons()).anyMatch(r -> r.contains("latestEnd must be after earliestStart"));
         assertThat(validatedEvents).isEmpty();
     }
 

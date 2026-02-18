@@ -17,10 +17,11 @@ class ScheduleRequestedLoggingListener {
 
     @EventListener
     void onScheduleRequested(ScheduleRequested event) {
-        log.info("ScheduleRequested: scheduleId={}, title='{}', start={}, end={}",
-            event.scheduleId(),
+        log.info("ScheduleRequested: requestId={}, title='{}', earliestStart={}, latestEnd={}, durationMinutes={}",
+            event.requestId(),
             event.title(),
-            event.startTime(),
-            event.endTime());
+            event.earliestStart(),
+            event.latestEnd(),
+            event.durationMinutes());
     }
 }

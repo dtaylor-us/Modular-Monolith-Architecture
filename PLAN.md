@@ -88,7 +88,8 @@ Single deployable modular monolith with four modules: **scheduling**, **constrai
 - End-to-end: POST schedule → constraints → optimization → `ScheduleOptimized` published.
 
 **Verification:**
-- Listener runs; optimized record stored; event published.
+- Unit tests: `ScheduleOptimizerTest`, `ConstraintsValidatedListenerTest`.
+- Manual: POST a valid schedule and observe logs for `ConstraintsValidated` and `ScheduleOptimized`. Confirm `optimized_schedules` table has a row for the schedule.
 
 ---
 

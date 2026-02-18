@@ -28,19 +28,25 @@ class ScheduleRequestedListener {
     @EventListener
     void onScheduleRequested(ScheduleRequested event) {
         ValidationResult result = validator.validate(
-            event.startTime(),
-            event.endTime(),
-            event.title()
+            event.earliestStart(),
+            event.latestEnd(),
+            event.durationMinutes(),
+            event.preferredStart()
         );
 
         if (result.valid()) {
             eventPublisher.publishEvent(new ConstraintsValidated(
-                event.scheduleId(),
+                event.requestId(),
+                event.title(),
+                event.earliestStart(),
+                event.latestEnd(),
+                event.durationMinutes(),
+                event.preferredStart(),
                 java.time.Instant.now()
             ));
         } else {
             eventPublisher.publishEvent(new ConstraintsFailed(
-                event.scheduleId(),
+                event.requestId(),
                 result.reasons(),
                 java.time.Instant.now()
             ));

@@ -30,5 +30,6 @@ class ModulithBoundariesTest {
         assertThat(MODULES.getModuleByName("constraints")).isPresent();
         assertThat(MODULES.getModuleByName("optimization")).isPresent();
         assertThat(MODULES.getModuleByName("notifications")).isPresent();
+        assertThat(MODULES.getModuleByName("scheduleview")).isPresent();
     }
 }

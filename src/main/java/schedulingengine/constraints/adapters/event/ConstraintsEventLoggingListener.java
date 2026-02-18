@@ -18,11 +18,12 @@ class ConstraintsEventLoggingListener {
 
     @EventListener
     void onConstraintsValidated(ConstraintsValidated event) {
-        log.info("ConstraintsValidated: scheduleId={}", event.scheduleId());
+        log.info("ConstraintsValidated: requestId={}, earliestStart={}, latestEnd={}", 
+            event.requestId(), event.earliestStart(), event.latestEnd());
     }
 
     @EventListener
     void onConstraintsFailed(ConstraintsFailed event) {
-        log.warn("ConstraintsFailed: scheduleId={}, reasons={}", event.scheduleId(), event.reasons());
+        log.warn("ConstraintsFailed: requestId={}, reasons={}", event.requestId(), event.reasons());
     }
 }
